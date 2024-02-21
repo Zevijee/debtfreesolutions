@@ -1,0 +1,165 @@
+.container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+
+.card {
+    flex: 1 1 200px; /* Grow to fill the space, base size of 200px */
+    margin: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 2px 2px 6px 0px #ccc;
+    text-decoration: none; 
+    transition: box-shadow 0.3s ease; /* Add transition for smooth effect */
+}
+
+.card:hover {
+    box-shadow: 6px 6px 12px 0px #ccc;
+    transform: translateY(-2px);
+    transition: box-shadow 0.5s ease, transform 0.5s ease; /* Increase the transition duration */
+}
+
+.notes {
+    font-size: 0.8em;
+    color: red;
+}
+
+/* Media query for screens wider than 600px */
+@media (min-width: 600px) {
+    .card {
+        flex: 1 1 40%; /* Adjusts the base size for larger screens */
+    }
+}
+
+/* Media query for screens wider than 900px */
+@media (min-width: 900px) {
+    .card {
+        flex: 1 1 30%; /* Further adjusts for even larger screens */
+    }
+}
+
+/* Media query for screens wider than 600px */
+@media (min-width: 1200px) {
+    .card {
+        flex: 1 1 20%; /* Adjusts the base size for larger screens */
+    }
+}
+
+.title {
+    background-color: #f4f4f4;
+    padding: 20px;
+    border-radius: 5px;
+    
+}
+
+.search-bar {
+    margin: 20px 0;
+    padding: 10px;
+}
+
+.property-details {
+    border: 1px solid #ccc; /* Adds a border around the property details */
+    border-radius: 8px; /* Rounds the corners of the border */
+    background-color: #f9f9f9; /* Light background color for the container */
+    margin-bottom: 20px; /* Adds some space below the container */
+}
+.property-details h4 {
+    color: #333; /* Darker color for keys */
+    margin-bottom: 5px; /* Less space below keys */
+    padding: 10px; /* Adds padding inside each section for spacing */
+}
+.property-details h5 {
+    color: #666; /* Lighter color for values */
+    margin-top: 0; /* Removes space above values */
+    padding: 10px; /* Adds padding inside each section for spacing */
+}
+.property-section {
+    padding: 20px; /* Adds padding inside each section for spacing */
+}
+
+.right-column .container {
+    max-height: 600px; /* Adjust the height as needed */
+    overflow-y: auto; /* This will enable vertical scrolling when necessary */
+}
+
+.container {
+    display: flex;
+}
+
+.left-column {
+    flex: 1;
+}
+
+.right-column {
+    flex: 1;
+    padding: 20px;
+}
+
+  
+.phone-card {
+    text-decoration: none; 
+}
+
+.index-span {
+    display: flex;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border-radius: 5px;
+}
+
+.index-span input[type="text"] {
+    margin-right: 10px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+.index-span h4 {
+    padding: 0 20px; /* Adjust this value to your preference */
+}
+
+.index-span button {
+    margin-right: 10px;
+    padding: 5px 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.index-span button:hover {
+    background-color: #0056b3;
+}
+
+.index-span select {
+    width: 150px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+#suggestions {
+    border: 1px solid #ddd;
+    display: none; /* Hide initially */
+}
+
+#suggestions {
+    border: 1px solid #ccc;
+    border-top: none; /* Assuming the search bar has a border */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    position: absolute; /* Adjust as necessary */
+    width: calc(100% - 2px); /* Adjust based on the parent's width */
+    max-height: 200px; /* Adjust as necessary */
+    overflow-y: auto; /* Enable scrolling for long lists */
+    background: #fff;
+    z-index: 1000; /* Ensure it's above other content */
+    width: 25%;
+}
+
+#suggestions div:hover {
+    background-color: #e9e9e9;
+    cursor: pointer;
+    color: #333;
+}

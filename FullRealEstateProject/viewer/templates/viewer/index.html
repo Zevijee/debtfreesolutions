@@ -1,0 +1,49 @@
+{% extends 'viewer/template.html' %}
+{% load static %}
+
+{% block head %}
+<h1>All Propertys</h1>
+{% endblock %}
+
+{% block buttons %}
+<a type="button" class="btn btn-primary" href="{% url 'index' %}">Home</a>
+<input type="text" id="datepicker">
+{% endblock %}
+
+{% block body %}
+<div>
+    <span class="index-span">
+        <input  id="searchPropertys" type="text" name="query" placeholder="Search for a property">
+            
+        <h4>Filter by Zip Code:</h4>
+        <select id="zip-code-select">
+            {% for zip_code in properties_by_zip.keys %}
+            <option value="{{ zip_code }}">{{ zip_code }}</option>
+            {% endfor %}
+        </select>
+    <span>
+</div>
+<div id="suggestions"></div>
+
+
+{% for zip_code, properties in properties_by_zip.items %}
+<div class="zip-code" id="{{zip_code}}">
+    <div class="container">
+            {% for property in properties %}
+            <a class="card" href="{% url 'property' property.id %}">
+                <h4>{{ property.address }} {{property.city}} NY {{property.zip_code}}  </h4>
+                {% for owner in property.owners.all %}
+                    <p><strong>Owner:</strong> {{ owner.name }}</p>
+                {% endfor %}
+                <strong>Custom Notes: </strong> 
+                <p class="notes"> {{ property.notes }} </p>
+                {% endfor %}
+            </a>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'viewer/index.js' %}"></script>
+{% endblock %}

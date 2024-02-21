@@ -1,0 +1,108 @@
+{% extends 'viewer/template.html' %}
+{% load static %}
+
+{% block head %}
+<h1>{{ property.address }} {{property.city}} NY {{property.zip_code}}</h2>
+{% endblock %}
+
+{% block buttons %}
+<a type="button" class="btn btn-primary" href="{% url 'index' %}">Home</a>
+<input type="text" id="datepicker">
+<div class="btn btn-primary" style="background-color: red;">
+    <form action="{% url 'property' property.id %}" method="post" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete this property?');">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="delete_property">
+        <!-- Use a button instead of an <a> tag for form submission -->
+        <button type="submit" style="background: none; border: none; color: white; cursor: pointer;">
+            Delete
+        </button>
+    </form>
+</div>
+
+<buton class="btn btn-primary" id="call-btn" style="background-color: green;" id="callBtn">call</buton>
+
+<!-- <button class="btn btn-primary" style="background-color: purple;">next</button> -->
+{% endblock %}
+
+
+{% block body %}
+<div style="display: flex;">
+    <div class="property-section" style="flex: 1; padding-right: 20px;">
+        <h2>Property Shark Data</h2>
+        <div class="property-details">
+            <h4>Block Lot</h4>
+            <h5>{{ property.block_lot }}</h5>
+            <h4>Arms Length</h4>
+            <h5>{{ property.arms_length }}</h5>
+            <h4>Purchase Price</h4>
+            <h5>{{ property.purchase_price }}</h5>
+            <h4>Purchase Date</h4>
+            <h5>{{ property.purchase_date }}</h5>
+            <h4>Building Class</h4>
+            <h5>{{ property.building_class }}</h5>
+            <h4>Building Dimensions</h4>
+            <h5>{{ property.building_dimensions }}</h5>
+            <h4>Building Sqft</h4>
+            <h5>{{ property.building_sqft }}</h5>
+            <h4>Lot Sqft</h4>
+            <h5>{{ property.lot_sqft }}</h5>
+            <h4>Lot Dimensions</h4>
+            <h5>{{ property.lot_dimensions }}</h5>
+            <h4>Zoning Districts</h4>
+            <h5>{{ property.zoning_districts }}</h5>
+            <h4>FAR As Built</h4>
+            <h5>{{ property.far_as_built }}</h5>
+            <h4>Special Factors</h4>
+            <h5>{{ property.special_factors }}</h5>
+        </div>
+        <div>
+            <form action="{% url 'property' property.id %}" method="post" >
+                <input type="hidden" name="action" value="create_note">
+                {% csrf_token %}
+                {% if property.notes == None %}
+                <textarea name="note" placeholder="Add a note..." style="width: 100%; height: 100vh; font-size: 27px;"></textarea>
+                {% else %}
+                <textarea name="note" placeholder="Add a note..." style="width: 100%; height: 100vh; font-size: 27px;">{{property.notes}}</textarea>
+                {% endif %}
+                <button type="submit" class="btn btn-primary">Add Note</button>
+            </form>
+        </div>
+    </div>
+        
+    <div style="flex: 1;">
+        <div>
+            <br>
+            <select id="current_owner">
+                {% for owner in owners %}
+                <option value="{{ owner.id }}">{{ owner.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% for person in true_people_data %}
+        <h3>Phone numbers for {{person.owner.name}} </h3>
+        <hr>
+        <div class="true-people" id="{{person.owner.id}}">
+            <div class="container">
+                {% for phone_number in phone_numbers %}
+                    {% if phone_number.owner.id == person.owner.id %}
+                    <a class="phone-card"  data-id="{{ phone_number.id }}">
+                        <div class="card">
+                            <h6>{{ phone_number.state }}</h6>
+                            <p>{{ phone_number.number }}</p>
+                        </div>
+                    </a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <hr>
+            {{ person.data | safe }} 
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'viewer/property.js' %}"></script>
+
+{% endblock %}

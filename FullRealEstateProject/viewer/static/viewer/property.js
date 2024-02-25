@@ -1,33 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     configurePhoneCard();
-    document.getElementById('call-btn').addEventListener('click', () => callQueque());
 });
-
-function callQueque() {
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-    const owners = document.getElementsByClassName('true-people')
-
-    // get the owner that is currently visible
-    for (var i = 0; i < owners.length; i++) {
-        if (owners[i].style.display !== 'none') {
-            owner = owners[i].id;
-        }
-    }
-
-    fetch('/call', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken,
-        },
-        body: JSON.stringify({
-            "mode": "queue",
-            "owner": owner
-        })
-    })
-}
-
 
 function updateNumberState(phoneNumberId, newState) {
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -70,12 +43,6 @@ function configurePhoneCard() {
     }
 }
 
-function makeACall(number) {
-    // Make an API call to the backend to the phone_number_config path
-    console.log('Making a call to: ' + number);
-}
-
-
 function showCustomDialog(phoneNumberId, cardElement) {
     // Make an API call to the backend to the phone_number_config path
     fetch(`/phone_number_config/${phoneNumberId}`)
@@ -84,6 +51,9 @@ function showCustomDialog(phoneNumberId, cardElement) {
             // Handle the response data
             var number = data.number; // Assuming 'data' has a 'number' property
             var state = data.state; // Assuming 'data' has a 'state' property
+            var realPhone = number.replace(/-/g, '').replace(/ /g, '').replace(/\(/g, '').replace(/\)/g, '');
+
+            console.log(`realPhone: ${realPhone}`);
 
             // Now that we have the data, show the SweetAlert2 dialog
             Swal.fire({
@@ -101,8 +71,9 @@ function showCustomDialog(phoneNumberId, cardElement) {
                 preConfirm: () => {
                     return document.getElementById('swal-input').value;
                 },
+                
                 didOpen: () => {
-                    document.getElementById('call-button').addEventListener('click', () => makeACall(number));
+                    document.getElementById('call-button').addEventListener('click', () => makeCall(realPhone));
                 }                
             }).then((result) => {
                 if (result.isConfirmed) {

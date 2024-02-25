@@ -1,0 +1,83 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SIPml5 Call</title>
+    <script type="text/javascript" src="{% static 'viewer/test.js' %}"></script>
+</head>
+<body>
+    <audio id="audio_remote" autoplay="autoplay"></audio>
+    <button id="call-btn">Call</button>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var sipStack, registerSession, callSession;
+
+            function onSipEventStack(e) {
+                console.log('onSipEventStack', e);
+                // Handle stack events here, e.g., registration success or failure
+            }
+
+            function onSipEventSession(e) {
+                console.log('onSipEventSession', e);
+                // Handle call session events here, e.g., call connected or ended
+            }
+
+            function initSIPml5() {
+                SIPml.init(function() {
+                    sipStack = new SIPml.Stack({
+                        realm: 'geshmak.duckdns.org',
+                        impi: '1001',
+                        impu: 'sip:1001@geshmak.duckdns.org',
+                        password: 'pinny',
+                        websocket_proxy_url: 'wss://geshmak.duckdns.org:8089/ws',
+                        ice_servers: [{ urls: 'stun:stun.l.google.com:19302'}],
+                        enable_rtcweb_breaker: false,
+                        events_listener: { events: '*', listener: onSipEventStack },
+                        enable_early_ims: true,
+                        enable_media_stream_cache: true,
+                        bandwidth: null,
+                        video_size: null,
+                    });
+                    sipStack.start();
+                });
+            }
+
+            function register() {
+                registerSession = sipStack.newSession('register', {
+                    events_listener: { events: '*', listener: onSipEventSession }
+                });
+                registerSession.register();
+            }
+
+            function makeCall(phoneNumber) {
+                var sipUri = 'sip:' + phoneNumber + '@geshmak.duckdns.org';
+                callSession = sipStack.newSession('call-audio', {
+                    audio_remote: document.getElementById('audio_remote'),
+                    events_listener: { events: '*', listener: onSipEventSession },
+                    sip_caps: [
+                        { name: '+g.oma.sip-im' },
+                        { name: 'language', value: '\"en,fr\"' }
+                    ]
+                });
+                callSession.call(sipUri);
+            }
+
+            function hangUp() {
+                if (callSession) {
+                    callSession.hangup();
+                }
+            }
+
+            // Initialize SIPml5 and register
+            initSIPml5();
+
+            // Add event listener for the call button
+            document.getElementById('call-btn').addEventListener('click', function() {
+                // Example phone number, replace with the desired number or use input from the user
+                makeCall('3606635793');
+            });
+        });
+    </script>
+</body>
+</html>

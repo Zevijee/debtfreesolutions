@@ -99,7 +99,7 @@ def date(request, date):
         event.date = event_date
         event.on_property = p
         event.owner = OwnerData.objects.filter(name=owner).first() if owner else None
-        event.note = note if note else None
+        event.notes = note if note else None
         
         event.save()            
 
@@ -257,3 +257,6 @@ def return_owners(request):
         }
 
     return JsonResponse(data)
+
+def test(request):
+    return render(request, 'viewer/testing.html')

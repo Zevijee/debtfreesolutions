@@ -10,4 +10,5 @@ urlpatterns = [
     path('phone_number_config/<str:phone_number>', views.phone_number_config, name='phone_number_config'),
     path('return_properties', views.return_properties, name='return_properties'),
     path('return_owners', views.return_owners, name='return_owners'),
+    path('test', views.test, name='test'),
 ]

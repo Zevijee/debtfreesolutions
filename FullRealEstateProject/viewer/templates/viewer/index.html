@@ -17,8 +17,9 @@
             
         <h4>Filter by Zip Code:</h4>
         <select id="zip-code-select">
-            {% for zip_code in properties_by_zip.keys %}
-            <option value="{{ zip_code }}">{{ zip_code }}</option>
+            {% for zip_code in properties_by_zip %}
+            <option value="{{ zip_code }}">{{ zip_code }}</option>\
+            
             {% endfor %}
         </select>
     <span>

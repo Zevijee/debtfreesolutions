@@ -70,3 +70,4 @@ class Event(models.Model):
 
     on_property = models.ForeignKey(PropertyData, on_delete=models.CASCADE, related_name='events', blank=True, null=True)
     owner = models.ForeignKey(OwnerData, on_delete=models.CASCADE, related_name='events', blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)

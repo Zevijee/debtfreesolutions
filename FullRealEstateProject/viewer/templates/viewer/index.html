@@ -3,11 +3,17 @@
 
 {% block head %}
 <h1>All Propertys</h1>
+<h3>There are {{ properties_count }} properties in the database</h3>
 {% endblock %}
 
 {% block buttons %}
 <a type="button" class="btn btn-primary" href="{% url 'index' %}">Home</a>
 <input type="text" id="datepicker">
+<form method="post">
+    {% csrf_token %}
+    <!-- Your form fields go here -->
+</form>
+<input id="hidden-zip" type="hidden" value="{{current_zip}}">
 {% endblock %}
 
 {% block body %}
@@ -18,8 +24,7 @@
         <h4>Filter by Zip Code:</h4>
         <select id="zip-code-select">
             {% for zip_code in properties_by_zip %}
-            <option value="{{ zip_code }}">{{ zip_code }}</option>\
-            
+            <option value="{{ zip_code }}" {% if zip_code == current_zip %}selected{% endif %}>{{ zip_code }}</option>
             {% endfor %}
         </select>
     <span>

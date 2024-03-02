@@ -18,6 +18,7 @@ class PropertyData(models.Model):
     zip_code = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     deleted = models.BooleanField(default=False)
+    priority = models.IntegerField(default=0)
 
     def __str__(self):
         return self.address
@@ -71,3 +72,6 @@ class Event(models.Model):
     on_property = models.ForeignKey(PropertyData, on_delete=models.CASCADE, related_name='events', blank=True, null=True)
     owner = models.ForeignKey(OwnerData, on_delete=models.CASCADE, related_name='events', blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
+
+class currentZip(models.Model):
+    zip_code = models.CharField(max_length=100, unique=True)

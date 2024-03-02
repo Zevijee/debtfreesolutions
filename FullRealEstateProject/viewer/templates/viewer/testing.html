@@ -1,82 +1,102 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>SIPml5 Call</title>
-    <script type="text/javascript" src="{% static 'viewer/test.js' %}"></script>
+    <meta charset="UTF-8">
+    <title>SIP.js Outgoing Call Example</title>
+    <script src="{% static 'viewer/jssip.js' %}"></script>
 </head>
 <body>
-    <audio id="audio_remote" autoplay="autoplay"></audio>
-    <button id="call-btn">Call</button>
+    <audio id="remoteAudio"></audio>
+
+    <button id="callButton">Make Call</button>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var sipStack, registerSession, callSession;
+        // Updated WebSocket Interface and SIP credentials
+        const socket = new JsSIP.WebSocketInterface('wss://debtfreesolutionsphone.duckdns.org:8089/ws');
+        socket.via_transport = 'wss';
 
-            function onSipEventStack(e) {
-                console.log('onSipEventStack', e);
-                // Handle stack events here, e.g., registration success or failure
+        // Updated Configuration with previous script's credentials
+        const configuration = {
+            uri: 'sip:1000@debtfreesolutionsphone.duckdns.org',
+            password: 'pinny',
+            realm: 'debtfreesolutionsphone.duckdns.org',
+            register: true,
+            session_timers: false,
+            sockets: [socket]
+        };
+
+        const ua = new JsSIP.UA(configuration);
+
+        // Setup events
+        ua.on('connected', function () {
+            console.log('Connected');
+        });
+        ua.on('disconnected', function () {
+            console.log('Disconnected');
+        });
+
+        // Make a call
+        const eventHandlers = {
+            'progress': function (e) {
+                console.log('call is in progress');
+            },
+            'failed': function (e) {
+                console.log('call failed with cause: ' + (e.data ? e.data.cause : 'no cause'), e);
+            },
+            'ended': function (e) {
+                console.log('call ended with cause: ' + (e.data ? e.data.cause : 'no cause'), e);
+            },
+            'confirmed': function (e) {
+                console.log('call confirmed');
+            },
+            'addstream': (e) => {
+                console.log('Add stream (event handlers)');
+                audio.srcObject = e.stream;
+                audio.play();
             }
+        };
 
-            function onSipEventSession(e) {
-                console.log('onSipEventSession', e);
-                // Handle call session events here, e.g., call connected or ended
-            }
+        const options = {
+            'eventHandlers': eventHandlers,
+            'mediaConstraints': {'audio': true, 'video': false}
+        };
 
-            function initSIPml5() {
-                SIPml.init(function() {
-                    sipStack = new SIPml.Stack({
-                        realm: 'geshmak.duckdns.org',
-                        impi: '1001',
-                        impu: 'sip:1001@geshmak.duckdns.org',
-                        password: 'pinny',
-                        websocket_proxy_url: 'wss://geshmak.duckdns.org:8089/ws',
-                        ice_servers: [{ urls: 'stun:stun.l.google.com:19302'}],
-                        enable_rtcweb_breaker: false,
-                        events_listener: { events: '*', listener: onSipEventStack },
-                        enable_early_ims: true,
-                        enable_media_stream_cache: true,
-                        bandwidth: null,
-                        video_size: null,
-                    });
-                    sipStack.start();
+        const audio = new window.Audio();
+
+        ua.on('registered', function () {
+            // Replace '0513887341' with the desired destination SIP URI
+            const session = ua.call('sip:3475868143@debtfreesolutionsphone.duckdns.org', options);
+
+            if (session.connection) {
+                console.log('Connection is valid');
+
+                session.connection.addEventListener('addstream', e => {
+                    console.log('Add stream');
+                    audio.srcObject = e.stream;
+                    audio.play();
                 });
+            } else {
+                console.log('Connection is null');
             }
+        });
 
-            function register() {
-                registerSession = sipStack.newSession('register', {
-                    events_listener: { events: '*', listener: onSipEventSession }
-                });
-                registerSession.register();
-            }
-
-            function makeCall(phoneNumber) {
-                var sipUri = 'sip:' + phoneNumber + '@geshmak.duckdns.org';
-                callSession = sipStack.newSession('call-audio', {
-                    audio_remote: document.getElementById('audio_remote'),
-                    events_listener: { events: '*', listener: onSipEventSession },
-                    sip_caps: [
-                        { name: '+g.oma.sip-im' },
-                        { name: 'language', value: '\"en,fr\"' }
-                    ]
-                });
-                callSession.call(sipUri);
-            }
-
-            function hangUp() {
-                if (callSession) {
-                    callSession.hangup();
-                }
-            }
-
-            // Initialize SIPml5 and register
-            initSIPml5();
-
-            // Add event listener for the call button
-            document.getElementById('call-btn').addEventListener('click', function() {
-                // Example phone number, replace with the desired number or use input from the user
-                makeCall('3606635793');
+        ua.on('newRTCSession', (data) => {
+            console.log('New RTC Session');
+            const session = data.session;
+            session.on('addstream', function(e){
+                // set remote audio stream (to listen to remote audio)
+                // This method is modernized to avoid deprecated methods
+                const remoteAudio = audio;
+                remoteAudio.srcObject = e.stream;
+                remoteAudio.play();
             });
+        });
+
+        const callButton = document.getElementById('callButton');
+        callButton.addEventListener('click', function () {
+            console.log('Call button clicked');
+            ua.start();
         });
     </script>
 </body>

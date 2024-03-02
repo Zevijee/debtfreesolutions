@@ -89,7 +89,9 @@
                         <div class="card-content">
                             <h4 class="card-title"><strong>Event: </strong>{{ event.event }}</h4>
                             <h4>For Property: </h4>
+                            {% if event.on_property %}
                             <a href="{% url 'property' event.on_property.id %}" >
+                            {% endif %}
 
                                 <h5 class="card-subtitle">{{ event.on_property }}</h5>                            
                             </a>

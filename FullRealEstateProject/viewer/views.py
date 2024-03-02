@@ -1,17 +1,38 @@
 from django.shortcuts import render, redirect
 from bs4 import BeautifulSoup
-from scraper.models import PropertyData, OwnerData, PreviousFilings, TruePeopleData, Event, PhoneNumber
+from scraper.models import PropertyData, OwnerData, PreviousFilings, TruePeopleData, Event, PhoneNumber, currentZip
 from django.http import JsonResponse, HttpResponseBadRequest
 import json
 import tkinter as tk
 from tkinter import ttk
 from django.db.models import Case, When, Value, IntegerField
 import subprocess
+import tkinter as tk
+from tkinter import ttk  # Import ttk module for ComboBox
+from django.http import JsonResponse
+import json
+import subprocess
+import time
+from datetime import datetime
+import pytz
+
+# Set the timezone to New York
+new_york_tz = pytz.timezone('America/New_York')
+
+# Get the current time in New York timezone
+now_in_new_york = datetime.now(new_york_tz)
+
+# Format the date and time in a 12-hour format including AM or PM
+formatted_time = now_in_new_york.strftime('%Y-%m-%d %I:%M:%S %p')
+
+print(formatted_time)
 
 
 # Create your views here.
 def index(request):
     properties = PropertyData.objects.filter(deleted=False)
+
+    zippy = currentZip.objects.first().zip_code
 
     for p in properties:
         owners = OwnerData.objects.filter(property=p)
@@ -31,10 +52,11 @@ def index(request):
         else:
             properties_by_zip[current_zip].append(p)
         
-    print(properties_by_zip)
+    # print(properties_by_zip)
 
     return render(request, 'viewer/index.html', {
-        'properties_by_zip': properties_by_zip
+        'properties_by_zip': properties_by_zip,
+        'current_zip': zippy,
         })
 
 def property(request, property_id):
@@ -68,12 +90,22 @@ def property(request, property_id):
     # Get the telephone numbers
     phone_numbers = PhoneNumber.objects.filter(owner__in=owners)
 
+    # Set the timezone to New York
+    new_york_tz = pytz.timezone('America/New_York')
+
+    # Get the current time in New York timezone
+    now_in_new_york = datetime.now(new_york_tz)
+
+    # Format the date and time in a 12-hour format including AM or PM
+    current_date = now_in_new_york.strftime('%Y-%m-%d %I:%M:%S %p')
+
     return render(request, 'viewer/property.html', {
             'property': property,
             'owners': owners,
             'previous_filings': previous_filings,
             'true_people_data': true_people_data,
-            'phone_numbers': phone_numbers
+            'phone_numbers': phone_numbers,
+            'current_date': current_date,
             })
 
 
@@ -117,95 +149,8 @@ def delete_event(request, event_id):
 
     return redirect('date', date=date)
 
-import tkinter as tk
-from tkinter import ttk  # Import ttk module for ComboBox
-from django.http import JsonResponse
-import json
-import subprocess
 
-def call(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        mode = data['mode']
 
-        if mode == 'queue':
-            owner = OwnerData.objects.get(id=data['owner'])
-            # Assuming you have the updated queryset with ordering as previously described
-            numbers = PhoneNumber.objects.filter(owner=owner).exclude(state='disconnected')\
-                                         .annotate(custom_order=Case(
-                                             When(state='active', then=Value(1)),
-                                             When(state='unknown', then=Value(2)),
-                                             default=Value(3),
-                                             output_field=IntegerField()))\
-                                         .order_by('custom_order').iterator()
-
-            def update_state():
-                if current_number:
-                    set_state(current_number.id, state_var.get())
-
-            def set_state(phone_number_id, state):
-                # Assuming PhoneNumber model and state updating logic is correctly implemented
-                number = PhoneNumber.objects.get(id=phone_number_id)
-                number.state = state
-                number.save()
-
-            def proceed_to_next_number():
-                update_state()  # Update the state when proceeding to the next number
-                nonlocal current_number
-                current_number = next(numbers, None)
-                if current_number:
-                    display_number(current_number.number)
-                    call_number(current_number.number)                    
-                else:
-                    root.destroy()  # Close the window if there are no more numbers
-
-            def end_program():
-                update_state()  # Ensure state is updated before closing
-                root.destroy()  # Immediately exit the GUI
-
-            def display_number(number, state):
-                text.delete('1.0', tk.END)  # Clear the existing text
-                text.insert(tk.END, f"Calling {number} State: {state}")  # Display the new number
-
-            def call_number(number):
-                clean_number = number.translate({ord(c): None for c in " ()-"})
-                subprocess.call(["C:\\Users\\philip chopp\\AppData\\Local\\MicroSIP\\microsip.exe", clean_number])
-
-            # Set up the Tkinter GUI
-            root = tk.Tk()
-            root.geometry("400x300")  # Adjust size for better appearance and to accommodate dropdown
-            root.title("Call Queue")
-            root.configure(bg="#f0f0f0")  # Set a light background color
-
-            # Dropdown for state selection
-            state_var = tk.StringVar(root)
-            state_dropdown = ttk.Combobox(root, textvariable=state_var, state="readonly",
-                                          values=["active", "disconnected", "unknown"])
-            state_dropdown.pack(pady=5)
-            state_dropdown.set("active")  # Default value
-
-            # Add a Set State button to apply the selected state
-            set_state_button = tk.Button(root, text="Set State", command=update_state)
-            set_state_button.pack(pady=5)
-
-            # Style the buttons and text widget as before
-            button_style = {'font': ('Helvetica', 12), 'bg': '#d9d9d9', 'padx': 10, 'pady': 5}
-            next_button = tk.Button(root, text="Next", command=proceed_to_next_number, **button_style)
-            next_button.pack(pady=10)
-            end_button = tk.Button(root, text="End", command=end_program, **button_style)
-            end_button.pack(pady=5)
-
-            text = tk.Text(root, height=5, width=50, font=('Helvetica', 12), bg="#ffffff")
-            text.pack(pady=10)
-
-            current_number = next(numbers, None)
-            if current_number:
-                display_number(current_number.number, current_number.state)
-                call_number(current_number.number)
-
-            root.mainloop()
-
-        return JsonResponse({'message': 'Success'})
 
 
 def phone_number_config(request, phone_number):
@@ -260,3 +205,14 @@ def return_owners(request):
 
 def test(request):
     return render(request, 'viewer/testing.html')
+
+def update_zip(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        zip_code = data['zip_code']
+
+        current_zip = currentZip.objects.first()
+        current_zip.zip_code = zip_code
+        current_zip.save()
+
+        return JsonResponse({'message': 'Success'})

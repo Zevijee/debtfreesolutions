@@ -25,9 +25,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 SECRET_KEY = 'django-insecure-mo0-v8arsb&+de6_0%x*_-g&*k2)c7kd*t(5%)sw2pw4w!ij-7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['debtfreesolutions.duckdns.org', '144.202.46.69']
+ALLOWED_HOSTS = ['debtfreesolutions.duckdns.org', '144.202.46.69', '127.0.0.1']
 
 
 # Application definition
